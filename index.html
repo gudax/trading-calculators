@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free CFD Trading Calculators | Leverage, Pip, Margin, Swap | GUDAX</title>
+    <meta name="description" content="Professional CFD trading calculators by GUDAX. Calculate leverage, pip value, lot size, required margin, and swap costs for Forex and CFD trading. 레버리지, 핍, 증거금, 스왑 계산기.">
+    <link rel="canonical" href="https://gudax.github.io/trading-calculators/" />
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "GUDAX CFD Trading Calculators",
+      "url": "https://gudax.github.io/trading-calculators/",
+      "description": "A comprehensive suite of trading calculators for CFD and Forex traders, including Leverage, Pip Value, Lot Size, Margin, and Swap calculators.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "author": {
+        "@type": "Organization",
+        "name": "GUDAX",
+        "url": "https://gudax.com"
+      }
+    }
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --card-bg: #141414;
+            --accent-color: #009FFF;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --input-bg: #1a1a1a;
+            --input-border: #333333;
+            --success-color: #00c853;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo span {
+            color: var(--accent-color);
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 50px;
+            font-size: 1.1rem;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tab-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            background: var(--accent-color);
+            color: #fff;
+            border-color: var(--accent-color);
+            box-shadow: 0 4px 20px rgba(0, 159, 255, 0.3);
+        }
+
+        .calculator-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 40px;
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .calculator-card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .label-ko {
+            font-size: 12px;
+            font-weight: 400;
+            opacity: 0.7;
+            margin-left: 5px;
+        }
+
+        input, select {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: #fff;
+            padding: 14px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .result-panel {
+            background: rgba(0, 159, 255, 0.05);
+            border: 1px solid rgba(0, 159, 255, 0.15);
+            border-radius: 12px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+
+        .cta-btn {
+            background: var(--accent-color);
+            color: #fff;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-block;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 159, 255, 0.4);
+        }
+
+        .secondary-link {
+            display: block;
+            margin-top: 15px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            text-decoration: underline;
+        }
+
+        footer {
+            margin-top: 80px;
+            padding: 60px 0;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .footer-text {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .footer-logo {
+            font-weight: 700;
+            font-size: 20px;
+            color: #fff;
+            text-decoration: none;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            .calc-grid {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <a href="https://gudax.com" class="logo">GUDAX<span>.</span></a>
+        <div class="nav-links">
+            <a href="https://gudax.com/markets">Markets</a>
+            <a href="https://gudax.com/platforms">Platforms</a>
+            <a href="https://platform.gudax.com">Login</a>
+        </div>
+    </header>
+
+    <main>
+        <h1>CFD Trading Calculators</h1>
+        <p class="subtitle">Empower your trading decisions with professional-grade financial tools.</p>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showCalc('leverage')">Leverage Calculator</button>
+            <button class="tab-btn" onclick="showCalc('pip')">Pip Value Calculator</button>
+            <button class="tab-btn" onclick="showCalc('lot')">Lot Size Calculator</button>
+            <button class="tab-btn" onclick="showCalc('margin')">Margin Calculator</button>
+            <button class="tab-btn" onclick="showCalc('swap')">Swap Calculator</button>
+        </div>
+
+        <div id="leverage" class="calculator-card active">
+            <div class="calc-grid">
+                <div class="inputs">
+                    <div class="input-group">
+                        <label>Deposit Amount <span class="label-ko">(예치금)</span></label>
+                        <input type="number" id="lev-deposit" value="1000" oninput="calcLeverage()">
+                    </div>
+                    <div class="input-group">
+                        <label>Leverage Ratio <span class="label-ko">(레버리지 비율)</span></label>
+                        <select id="lev-ratio" onchange="calcLeverage()">
+                            <option value="1">1:1</option>
+                            <option value="10">1:10</option>
+                            <option value="50">1:50</option>
+                            <option value="100" selected>1:100</option>
+                            <option value="200">1:200</option>
+                            <option value="500">1:500</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="result-panel">
+                    <div class="result-label">Potential Position Size (거래 가능 규모)</div>
+                    <div class="result-value" id="lev-result">$100,000.00</div>
+                    <a href="https://platform.gudax.com" class="cta-btn">Start Trading on GUDAX</a>
+                    <a href="https://gudax.com" class="secondary-link">Open Free Account</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="pip" class="calculator-card">
+            <div class="calc-grid">
+                <div class="inputs">
+                    <div class="input-group">
+                        <label>Currency Pair <span class="label-ko">(통화쌍)</span></label>
+                        <select id="pip-pair" onchange="calcPip()">
+                            <option value="10">EUR/USD</option>
+                            <option value="10">GBP/USD</option>
+                            <option value="10">AUD/USD</option>
+                            <option value="8.9">USD/JPY</option>
+                            <option value="7.2">USD/CHF</option>
+                            <option value="7.4">USD/CAD</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Lot Size <span class="label-ko">(랏 사이즈)</span></label>
+                        <input type="number" id="pip-lots" value="1.0" step="0.1" oninput="calcPip()">
+                    </div>
+                </div>
+                <div class="result-panel">
+                    <div class="result-label">Pip Value in USD (핍 가치)</div>
+                    <div class="result-value" id="pip-result">$10.00</div>
+                    <a href="https://platform.gudax.com" class="cta-btn">Start Trading on GUDAX</a>
+                    <a href="https://gudax.com" class="secondary-link">Open Free Account</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="lot" class="calculator-card">
+            <div class="calc-grid">
+                <div class="inputs">
+                    <div class="input-group">
+                        <label>Account Balance <span class="label-ko">(잔고)</span></label>
+                        <input type="number" id="lot-balance" value="5000" oninput="calcLot()">
+                    </div>
+                    <div class="input-group">
+                        <label>Risk % <span class="label-ko">(리스크 비율)</span></label>
+                        <input type="number" id="lot-risk" value="1" step="0.5" oninput="calcLot()">
+                    </div>
+                    <div class="input-group">
+                        <label>Stop Loss (Pips) <span class="label-ko">(손절매 핍)</span></label>
+                        <input type="number" id="lot-sl" value="20" oninput="calcLot()">
+                    </div>
+                </div>
+                <div class="result-panel">
+                    <div class="result-label">Recommended Lot Size (추천 랏 사이즈)</div>
+                    <div class="result-value" id="lot-result">0.25 Lots</div>
+                    <a href="https://platform.gudax.com" class="cta-btn">Start Trading on GUDAX</a>
+                    <a href="https://gudax.com" class="secondary-link">Open Free Account</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="margin" class="calculator-card">
+            <div class="calc-grid">
+                <div class="inputs">
+                    <div class="input-group">
+                        <label>Lots to Trade <span class="label-ko">(거래 랏 수)</span></label>
+                        <input type="number" id="marg-lots" value="1.0" step="0.1" oninput="calcMargin()">
+                    </div>
+                    <div class="input-group">
+                        <label>Leverage <span class="label-ko">(레버리지)</span></label>
+                        <select id="marg-lev" onchange="calcMargin()">
+                            <option value="1">1:1</option>
+                            <option value="10">1:10</option>
+                            <option value="50">1:50</option>
+                            <option value="100" selected>1:100</option>
+                            <option value="500">1:500</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Instrument Price <span class="label-ko">(현재가)</span></label>
+                        <input type="number" id="marg-price" value="1.0850" step="0.0001" oninput="calcMargin()">
+                    </div>
+                </div>
+                <div class="result-panel">
+                    <div class="result-label">Required Margin (필요 증거금)</div>
+                    <div class="result-value" id="marg-result">$1,085.00</div>
+                    <a href="https://platform.gudax.com" class="cta-btn">Start Trading on GUDAX</a>
+                    <a href="https://gudax.com" class="secondary-link">Open Free Account</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="swap" class="calculator-card">
+            <div class="calc-grid">
+                <div class="inputs">
+                    <div class="input-group">
+                        <label>Lot Size <span class="label-ko">(랏 사이즈)</span></label>
+                        <input type="number" id="swap-lots" value="1.0" step="0.1" oninput="calcSwap()">
+                    </div>
+                    <div class="input-group">
+                        <label>Swap Rate (Points) <span class="label-ko">(스왑 포인트)</span></label>
+                        <input type="number" id="swap-rate" value="-5.5" step="0.1" oninput="calcSwap()">
+                    </div>
+                    <div class="input-group">
+                        <label>Point Size <span class="label-ko">(포인트 크기)</span></label>
+                        <select id="swap-point" onchange="calcSwap()">
+                            <option value="0.00001">0.00001 (5 digits)</option>
+                            <option value="0.001">0.001 (3 digits - JPY)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="result-panel">
+                    <div class="result-label">Daily Swap Cost (일일 스왑 비용)</div>
+                    <div class="result-value" id="swap-result">-$5.50</div>
+                    <p style="color:var(--text-secondary); font-size: 12px; margin-top: -10px;">Monthly Est: <span id="swap-monthly">-$165.00</span></p>
+                    <a href="https://platform.gudax.com" class="cta-btn" style="margin-top: 20px;">Start Trading on GUDAX</a>
+                    <a href="https://gudax.com" class="secondary-link">Open Free Account</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <a href="https://gudax.com" class="footer-logo">GUDAX</a>
+        <p class="footer-text">Powered by GUDAX - Trade 300+ instruments with leverage up to 1:500</p>
+        <p class="footer-text" style="opacity: 0.5; font-size: 12px;">Risk Warning: CFDs are complex instruments and come with a high risk of losing money rapidly due to leverage. You should consider whether you understand how CFDs work and whether you can afford to take the high risk of losing your money.</p>
+    </footer>
+</div>
+
+<script>
+    function showCalc(id) {
+        const btn = event.currentTarget;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.calculator-card').forEach(card => card.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function formatCurrency(val) {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+    }
+
+    function calcLeverage() {
+        const deposit = parseFloat(document.getElementById('lev-deposit').value) || 0;
+        const ratio = parseFloat(document.getElementById('lev-ratio').value) || 0;
+        const result = deposit * ratio;
+        document.getElementById('lev-result').innerText = formatCurrency(result);
+    }
+
+    function calcPip() {
+        const valPerPip = parseFloat(document.getElementById('pip-pair').value) || 0;
+        const lots = parseFloat(document.getElementById('pip-lots').value) || 0;
+        const result = valPerPip * lots;
+        document.getElementById('pip-result').innerText = formatCurrency(result);
+    }
+
+    function calcLot() {
+        const balance = parseFloat(document.getElementById('lot-balance').value) || 0;
+        const riskP = parseFloat(document.getElementById('lot-risk').value) || 0;
+        const sl = parseFloat(document.getElementById('lot-sl').value) || 0;
+        const riskAmt = balance * (riskP / 100);
+        const lotSize = sl > 0 ? (riskAmt / (sl * 10)) : 0;
+        document.getElementById('lot-result').innerText = lotSize.toFixed(2) + " Lots";
+    }
+
+    function calcMargin() {
+        const lots = parseFloat(document.getElementById('marg-lots').value) || 0;
+        const lev = parseFloat(document.getElementById('marg-lev').value) || 1;
+        const price = parseFloat(document.getElementById('marg-price').value) || 0;
+        const margin = (lots * 100000 * price) / lev;
+        document.getElementById('marg-result').innerText = formatCurrency(margin);
+    }
+
+    function calcSwap() {
+        const lots = parseFloat(document.getElementById('swap-lots').value) || 0;
+        const rate = parseFloat(document.getElementById('swap-rate').value) || 0;
+        const point = parseFloat(document.getElementById('swap-point').value) || 0;
+        const daily = lots * 100000 * point * rate;
+        document.getElementById('swap-result').innerText = formatCurrency(daily);
+        document.getElementById('swap-monthly').innerText = formatCurrency(daily * 30);
+    }
+
+    window.onload = () => {
+        calcLeverage();
+        calcPip();
+        calcLot();
+        calcMargin();
+        calcSwap();
+    };
+</script>
+
+</body>
+</html>
