@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스왑 계산기 - 롤오버 비용 계산 | GUDAX</title>
+    <meta name="description" content="GUDAX의 실시간 스왑 포인트 계산기를 사용하여 FX 및 CFD 거래의 롤오버 비용을 미리 계산해 보세요. 매수/매도 포지션별 정확한 스왑 비용을 확인하실 수 있습니다.">
+    <link rel="canonical" href="https://gudax-tools.github.io/calculators/swap/">
+    <link rel="alternate" hreflang="ko" href="https://gudax-tools.github.io/calculators/swap/">
+    <link rel="alternate" hreflang="en" href="https://gudax-tools.github.io/calculators/swap/">
+    <link rel="icon" type="image/svg+xml" href="https://gudax.com/assets/gudaxsymbol.svg">
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-T7TKHNXZ');</script>
+    <!-- End Google Tag Manager -->
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "GUDAX Swap Calculator",
+      "url": "https://gudax-tools.github.io/calculators/swap/",
+      "description": "Calculate rollover swap costs for major currency pairs on GUDAX.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "All"
+    }
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --card-bg: #111111;
+            --card-border: #222222;
+            --brand-blue: #009FFF;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --success: #00e676;
+            --danger: #ff5252;
+            --nav-height: 64px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            height: var(--nav-height);
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--brand-blue);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--brand-blue);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 20px;
+            z-index: 999;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .mobile-nav.open {
+            display: flex;
+        }
+
+        .mobile-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 1rem;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .mobile-nav a:last-child {
+            border-bottom: none;
+        }
+
+        .mobile-nav a:hover, .mobile-nav a.active {
+            color: var(--brand-blue);
+        }
+
+        /* Main Content */
+        main {
+            margin-top: calc(var(--nav-height) + 2rem);
+            padding: 2rem;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+            min-height: calc(100vh - 200px);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #ffffff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-secondary);
+        }
+
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .card:hover {
+            border-color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        select, input[type="number"], input[type="text"] {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid var(--card-border);
+            color: white;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--brand-blue);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            background: #1a1a1a;
+            padding: 4px;
+            border-radius: 10px;
+        }
+
+        .radio-option {
+            flex: 1;
+            text-align: center;
+        }
+
+        .radio-option input {
+            display: none;
+        }
+
+        .radio-option label {
+            display: block;
+            padding: 0.6rem;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-bottom: 0;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .radio-option input:checked + label {
+            background: var(--brand-blue);
+            color: white;
+        }
+
+        .range-container {
+            padding: 1rem 0;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--brand-blue);
+            cursor: pointer;
+        }
+
+        .range-value {
+            text-align: right;
+            font-weight: bold;
+            color: var(--brand-blue);
+            font-size: 1.1rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--brand-blue);
+        }
+
+        /* Results Card */
+        .results-list {
+            list-style: none;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .result-value {
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .result-value.positive { color: var(--success); }
+        .result-value.negative { color: var(--danger); }
+
+        .summary-box {
+            background: #1a1a1a;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+        }
+
+        .summary-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .summary-total {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--brand-blue);
+        }
+
+        /* Swap Table Mini */
+        .swap-info-mini {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 5rem;
+            padding: 4rem 2rem;
+            border-top: 1px solid var(--card-border);
+            text-align: center;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: var(--brand-blue);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 159, 255, 0.2);
+        }
+
+        .risk-warning {
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            padding: 1rem;
+            border: 1px dashed #444;
+            border-radius: 8px;
+        }
+
+        .license-info {
+            font-size: 0.8rem;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+
+        .copyright {
+            font-size: 0.8rem;
+            color: #444;
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T7TKHNXZ"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <nav>
+        <a href="https://gudax.com" class="logo">GUDAX</a>
+        <div class="nav-links">
+            <a href="../leverage/">레버리지 계산기</a>
+            <a href="../pip/">핍 계산기</a>
+            <a href="../lot-size/">롯 사이즈 계산기</a>
+            <a href="#" class="active">스왑 계산기</a>
+        </div>
+        <button class="mobile-menu-btn" aria-label="메뉴">☰</button>
+    </nav>
+    <div class="mobile-nav" id="mobileNav">
+        <a href="../leverage/">레버리지 계산기</a>
+        <a href="../pip/">핍 계산기</a>
+        <a href="../lot-size/">롯 사이즈 계산기</a>
+        <a href="#" class="active">스왑 계산기</a>
+    </div>
+
+    <main>
+        <header>
+            <h1>스왑 계산기</h1>
+            <p>보유 포지션의 롤오버 비용을 즉시 계산하세요</p>
+        </header>
+
+        <div class="calculator-grid">
+            <!-- Inputs -->
+            <div class="card">
+                <div class="input-group">
+                    <label>통화쌍 (Currency Pair)</label>
+                    <select id="pairSelect">
+                        <option value="EURUSD">EUR/USD</option>
+                        <option value="GBPUSD">GBP/USD</option>
+                        <option value="USDJPY">USD/JPY</option>
+                        <option value="AUDUSD">AUD/USD</option>
+                        <option value="USDCHF">USD/CHF</option>
+                        <option value="NZDUSD">NZD/USD</option>
+                        <option value="USDCAD">USD/CAD</option>
+                        <option value="EURJPY">EUR/JPY</option>
+                        <option value="GBPJPY">GBP/JPY</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>포지션 방향 (Direction)</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" name="direction" id="long" value="long" checked>
+                            <label for="long">매수 (Buy)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="direction" id="short" value="short">
+                            <label for="short">매도 (Sell)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>롯 사이즈 (Lot Size)</label>
+                    <input type="number" id="lotSize" value="1.0" step="0.01" min="0.01">
+                </div>
+
+                <div class="input-group">
+                    <label>보유 일수 (Duration): <span id="daysVal" class="range-value">30</span>일</label>
+                    <div class="range-container">
+                        <input type="range" id="daysSlider" min="1" max="365" value="30">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label class="checkbox-group">
+                        <input type="checkbox" id="tripleSwap">
+                        <span>수요일 포함 (3배 스왑 적용)</span>
+                    </label>
+                </div>
+
+                <div class="swap-info-mini">
+                    현재 적용 스왑 포인트: <span id="currentSwapPoint" style="color: white; font-weight: bold;">-7.2</span>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="card">
+                <div class="summary-box">
+                    <span class="summary-title">총 예상 스왑 비용 (Total Cost)</span>
+                    <div id="totalCost" class="summary-total">$0.00</div>
+                </div>
+
+                <ul class="results-list">
+                    <li class="result-item">
+                        <span class="result-label">일일 스왑 비용 (Daily)</span>
+                        <span id="dailyCost" class="result-value">-$0.00</span>
+                    </li>
+                    <li class="result-item">
+                        <span class="result-label">주간 스왑 비용 (Weekly)</span>
+                        <span id="weeklyCost" class="result-value">-$0.00</span>
+                    </li>
+                    <li class="result-item">
+                        <span class="result-label">연환산 비용 (Annualized)</span>
+                        <span id="annualCost" class="result-value">-$0.00</span>
+                    </li>
+                </ul>
+
+                <p style="margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-secondary); text-align: center;">
+                    * 위 금액은 해당 통화쌍의 상대 통화(Quote Currency) 기준입니다.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="risk-warning">
+            ⚠️ CFD 거래는 원금 손실 위험이 있습니다. 레버리지는 이익뿐만 아니라 손실도 확대할 수 있습니다. 투자 전 충분한 이해와 주의가 필요합니다.
+        </div>
+        <a href="https://platform.gudax.com" target="_blank" rel="noopener noreferrer" class="cta-btn">GUDAX에서 거래 시작하기 →</a>
+        <div class="license-info">GUDAX | Comoros License L15883/G</div>
+        <div class="copyright">© 2026 GUDAX. All rights reserved.</div>
+    </footer>
+
+    <script>
+        const swapRates = {
+            'EURUSD': { long: -7.2, short: 3.1, pointVal: 1, currency: '$' },
+            'GBPUSD': { long: -5.8, short: 1.9, pointVal: 1, currency: '$' },
+            'USDJPY': { long: 4.5, short: -8.3, pointVal: 100, currency: '¥' },
+            'AUDUSD': { long: -4.1, short: 0.8, pointVal: 1, currency: '$' },
+            'USDCHF': { long: 3.2, short: -6.5, pointVal: 1, currency: '₣' },
+            'NZDUSD': { long: -3.5, short: 0.5, pointVal: 1, currency: '$' },
+            'USDCAD': { long: 2.1, short: -5.2, pointVal: 1, currency: 'C$' },
+            'EURJPY': { long: -2.8, short: -1.5, pointVal: 100, currency: '¥' },
+            'GBPJPY': { long: -1.2, short: -3.8, pointVal: 100, currency: '¥' }
+        };
+
+        const pairSelect = document.getElementById('pairSelect');
+        const lotSizeInput = document.getElementById('lotSize');
+        const daysSlider = document.getElementById('daysSlider');
+        const daysValDisplay = document.getElementById('daysVal');
+        const tripleSwapCheck = document.getElementById('tripleSwap');
+        const currentSwapPointDisplay = document.getElementById('currentSwapPoint');
+        
+        const totalCostDisplay = document.getElementById('totalCost');
+        const dailyCostDisplay = document.getElementById('dailyCost');
+        const weeklyCostDisplay = document.getElementById('weeklyCost');
+        const annualCostDisplay = document.getElementById('annualCost');
+
+        function updateCalculation() {
+            const pair = pairSelect.value;
+            const direction = document.querySelector('input[name="direction"]:checked').value;
+            const lots = parseFloat(lotSizeInput.value) || 0;
+            const days = parseInt(daysSlider.value);
+            const isTriple = tripleSwapCheck.checked;
+
+            const rateData = swapRates[pair];
+            const swapPoint = direction === 'long' ? rateData.long : rateData.short;
+            const pointVal = rateData.pointVal;
+            const currency = rateData.currency;
+
+            currentSwapPointDisplay.textContent = (swapPoint > 0 ? '+' : '') + swapPoint;
+            daysValDisplay.textContent = days;
+
+            // Daily Calculation
+            // Base formula: Points * Lots * (ContractSize * PointSize)
+            const daily = swapPoint * lots * pointVal;
+            
+            // Total Calculation
+            let effectiveDays = days;
+            if (isTriple) effectiveDays += 2;
+
+            const total = daily * effectiveDays;
+            const weekly = daily * 7;
+            const annual = daily * 365;
+
+            // Update UI
+            formatResult(totalCostDisplay, total, currency);
+            formatResult(dailyCostDisplay, daily, currency);
+            formatResult(weeklyCostDisplay, weekly, currency);
+            formatResult(annualCostDisplay, annual, currency);
+        }
+
+        function formatResult(element, value, currency) {
+            const isPositive = value > 0;
+            element.className = isPositive ? 'result-value positive' : (value < 0 ? 'result-value negative' : 'result-value');
+            if (element === totalCostDisplay) {
+                element.className = 'summary-total ' + (isPositive ? 'positive' : (value < 0 ? 'negative' : ''));
+            }
+            
+            let symbol = currency;
+            let formattedValue = Math.abs(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            
+            element.textContent = (value < 0 ? '-' : (isPositive ? '+' : '')) + symbol + formattedValue;
+        }
+
+        // Event Listeners
+        [pairSelect, lotSizeInput, daysSlider, tripleSwapCheck].forEach(el => {
+            el.addEventListener('input', updateCalculation);
+        });
+
+        document.querySelectorAll('input[name="direction"]').forEach(el => {
+            el.addEventListener('change', updateCalculation);
+        });
+
+        // Initialize
+        updateCalculation();
+
+        // Mobile Menu
+        document.querySelector('.mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('mobileNav').classList.toggle('open');
+        });
+    </script>
+</body>
+</html>

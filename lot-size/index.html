@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>롯 사이즈 계산기 - 적정 거래량 계산 | GUDAX</title>
+    <meta name="description" content="GUDAX의 롯 사이즈 계산기를 사용하여 계좌 잔액과 리스크 비율에 따른 최적의 거래량을 계산하세요. 효율적인 자금 관리를 위한 필수 도구.">
+    <link rel="canonical" href="https://gudax-tools.github.io/calculators/lot-size/">
+    <link rel="alternate" hreflang="ko" href="https://gudax-tools.github.io/calculators/lot-size/">
+    <link rel="alternate" hreflang="en" href="https://gudax-tools.github.io/calculators/lot-size/en/">
+    <link rel="icon" type="image/svg+xml" href="https://gudax.com/assets/gudaxsymbol.svg">
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-T7TKHNXZ');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "GUDAX Lot Size Calculator",
+      "description": "Calculate the ideal position size based on account balance, risk percentage, and stop loss pips.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "All",
+      "url": "https://gudax-tools.github.io/calculators/lot-size/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --card-bg: #111111;
+            --card-border: #222222;
+            --brand-blue: #009FFF;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+            --green: #00c853;
+            --yellow: #ffd600;
+            --red: #ff3d00;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: color 0.3s;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--brand-blue);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--brand-blue);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: var(--text-main);
+        }
+
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 20px;
+            z-index: 999;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .mobile-nav.open {
+            display: flex;
+        }
+
+        .mobile-nav a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 1rem;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .mobile-nav a:last-child {
+            border-bottom: none;
+        }
+
+        .mobile-nav a:hover, .mobile-nav a.active {
+            color: var(--brand-blue);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1000px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #ffffff, #009FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-dim);
+        }
+
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: #333;
+        }
+
+        /* Inputs */
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+        }
+
+        input, select {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid var(--card-border);
+            color: white;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--brand-blue);
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            accent-color: var(--brand-blue);
+        }
+
+        .risk-value {
+            font-weight: 600;
+            color: var(--brand-blue);
+            min-width: 3rem;
+        }
+
+        /* Results */
+        .results-card {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .main-result {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(0, 159, 255, 0.05);
+            border: 1px solid rgba(0, 159, 255, 0.2);
+            border-radius: 12px;
+        }
+
+        .main-result .label {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+        }
+
+        .main-result .value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--brand-blue);
+            line-height: 1;
+        }
+
+        .main-result .unit {
+            font-size: 1.2rem;
+            margin-left: 0.5rem;
+        }
+
+        .result-items {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .result-item {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .result-item .label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-item .value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* Risk Meter */
+        .risk-meter-container {
+            margin-top: 1rem;
+        }
+
+        .risk-meter-bar {
+            height: 8px;
+            background: #222;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .risk-meter-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+
+        .risk-status {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 5rem;
+            border-top: 1px solid var(--card-border);
+            padding: 4rem 2rem;
+            background: #050505;
+            text-align: center;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: var(--brand-blue);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 10px 20px rgba(0, 159, 255, 0.2);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 159, 255, 0.4);
+        }
+
+        .risk-warning {
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .license-info {
+            font-size: 0.8rem;
+            color: #444;
+            margin-bottom: 1rem;
+        }
+
+        .copyright {
+            font-size: 0.8rem;
+            color: #333;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+            .nav-links {
+                display: none;
+            }
+            .mobile-menu-btn {
+                display: block;
+            }
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T7TKHNXZ"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <nav>
+        <a href="https://gudax.com" class="logo">GUDAX</a>
+        <div class="nav-links">
+            <a href="../leverage/">레버리지 계산기</a>
+            <a href="../pip/">핍 계산기</a>
+            <a href="#" class="active">롯 사이즈 계산기</a>
+            <a href="../swap/">스왑 계산기</a>
+        </div>
+        <button class="mobile-menu-btn" aria-label="메뉴">☰</button>
+    </nav>
+    <div class="mobile-nav" id="mobileNav">
+        <a href="../leverage/">레버리지 계산기</a>
+        <a href="../pip/">핍 계산기</a>
+        <a href="#" class="active">롯 사이즈 계산기</a>
+        <a href="../swap/">스왑 계산기</a>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>롯 사이즈 계산기</h1>
+            <p>귀하의 리스크 관리 전략에 가장 적합한 거래량을 즉시 계산하세요.</p>
+        </header>
+
+        <div class="calculator-grid">
+            <!-- Input Section -->
+            <div class="card">
+                <div class="input-group">
+                    <label for="acc-currency">계좌 통화 (Account Currency)</label>
+                    <select id="acc-currency">
+                        <option value="USD" selected>USD - 미국 달러</option>
+                        <option value="EUR">EUR - 유로</option>
+                        <option value="KRW">KRW - 대한민국 원</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="balance">계좌 잔액 (Account Balance)</label>
+                    <input type="number" id="balance" value="10000" step="100">
+                </div>
+
+                <div class="input-group">
+                    <label>리스크 비율 (Risk %)</label>
+                    <div class="slider-container">
+                        <input type="range" id="risk-slider" min="0.5" max="10" step="0.1" value="2">
+                        <span class="risk-value" id="risk-display">2.0%</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="stoploss">손절 핍수 (Stop Loss Pips)</label>
+                    <input type="number" id="stoploss" value="50">
+                </div>
+
+                <div class="input-group">
+                    <label for="pair">통화쌍 (Currency Pair)</label>
+                    <select id="pair">
+                        <option value="EURUSD">EUR/USD</option>
+                        <option value="GBPUSD">GBP/USD</option>
+                        <option value="USDJPY">USD/JPY</option>
+                        <option value="AUDUSD">AUD/USD</option>
+                        <option value="USDCAD">USD/CAD</option>
+                        <option value="USDCHF">USD/CHF</option>
+                        <option value="NZDUSD">NZD/USD</option>
+                        <option value="EURJPY">EUR/JPY</option>
+                        <option value="GBPJPY">GBP/JPY</option>
+                        <option value="XAUUSD">GOLD (Gold)</option>
+                    </select>
+                </div>
+
+                <div id="price-input-group" class="input-group" style="display: none;">
+                    <label for="current-price">현재가 (Current Price)</label>
+                    <input type="number" id="current-price" step="0.00001" placeholder="예: 150.25">
+                </div>
+            </div>
+
+            <!-- Result Section -->
+            <div class="results-card">
+                <div class="card" style="flex: 1;">
+                    <div class="main-result">
+                        <div class="label">적정 거래량 (Recommended Size)</div>
+                        <div class="value" id="res-lots">4.00</div>
+                        <span class="unit">Lots</span>
+                    </div>
+
+                    <div class="risk-meter-container">
+                        <div class="risk-meter-bar">
+                            <div class="risk-meter-fill" id="risk-bar"></div>
+                        </div>
+                        <div class="risk-status" id="risk-status">안전 (Safe)</div>
+                    </div>
+
+                    <div class="result-items" style="margin-top: 2rem;">
+                        <div class="result-item">
+                            <span class="label">리스크 금액</span>
+                            <span class="value" id="res-risk-amt">$200.00</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">1핍당 가치</span>
+                            <span class="value" id="res-pip-val">$1.00</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">포지션 규모</span>
+                            <span class="value" id="res-pos-size">$400,000</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">최대 손실액</span>
+                            <span class="value" id="res-max-loss">$200.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <a href="https://platform.gudax.com" target="_blank" rel="noopener noreferrer" class="cta-btn">GUDAX에서 거래 시작하기 →</a>
+        <p class="risk-warning">
+            ⚠️ CFD 거래는 원금 손실 위험이 있습니다. 레버리지를 활용한 거래는 이익뿐만 아니라 손실 가능성도 높입니다. 투자 전 본인의 투자 목적, 경험 수준 및 리스크 감수 능력을 충분히 고려하시기 바랍니다.
+        </p>
+        <p class="license-info">GUDAX | Comoros License L15883/G</p>
+        <p class="copyright">© 2026 GUDAX. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const inputs = ['acc-currency', 'balance', 'risk-slider', 'stoploss', 'pair', 'current-price'];
+        const elements = {};
+        inputs.forEach(id => elements[id] = document.getElementById(id));
+
+        const resLots = document.getElementById('res-lots');
+        const resRiskAmt = document.getElementById('res-risk-amt');
+        const resPipVal = document.getElementById('res-pip-val');
+        const resPosSize = document.getElementById('res-pos-size');
+        const resMaxLoss = document.getElementById('res-max-loss');
+        const riskDisplay = document.getElementById('risk-display');
+        const riskBar = document.getElementById('risk-bar');
+        const riskStatus = document.getElementById('risk-status');
+
+        // Simple approximate rates for currency conversion if account currency != USD
+        const rates = {
+            USD: 1,
+            EUR: 1.08,
+            KRW: 0.00075
+        };
+
+        const symbols = {
+            USD: '$',
+            EUR: '€',
+            KRW: '₩'
+        };
+
+        function updateUI() {
+            const pair = elements['pair'].value;
+            if (pair.includes('JPY') || pair === 'USDCAD' || pair === 'USDCHF') {
+                document.getElementById('price-input-group').style.display = 'block';
+            } else {
+                document.getElementById('price-input-group').style.display = 'none';
+            }
+            calculate();
+        }
+
+        function calculate() {
+            const accCurrency = elements['acc-currency'].value;
+            const balance = parseFloat(elements['balance'].value) || 0;
+            const riskPercent = parseFloat(elements['risk-slider'].value);
+            const stopLoss = parseFloat(elements['stoploss'].value) || 1;
+            const pair = elements['pair'].value;
+            const price = parseFloat(elements['current-price'].value) || 150; 
+
+            riskDisplay.innerText = riskPercent.toFixed(1) + '%';
+
+            const riskAmt = balance * (riskPercent / 100);
+            
+            let pipValueInUSD = 10; 
+            if (pair.includes('JPY')) {
+                pipValueInUSD = (1000 / price); 
+            } else if (pair === 'USDCAD' || pair === 'USDCHF') {
+                pipValueInUSD = (10 / price);
+            } else if (pair === 'XAUUSD') {
+                pipValueInUSD = 10; 
+            }
+
+            const pipValueInAcc = pipValueInUSD / (rates[accCurrency] || 1);
+            let lotSize = riskAmt / (stopLoss * pipValueInAcc);
+            if (lotSize < 0.01) lotSize = 0;
+            
+            const symbol = symbols[accCurrency];
+            resLots.innerText = lotSize.toFixed(2);
+            resRiskAmt.innerText = symbol + riskAmt.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            resPipVal.innerText = symbol + (lotSize * pipValueInAcc / 1).toFixed(2);
+            resPosSize.innerText = symbol + (lotSize * 100000 * (pair.startsWith('USD') ? 1 : price) / (rates[accCurrency] || 1)).toLocaleString(undefined, {maximumFractionDigits: 0});
+            resMaxLoss.innerText = symbol + riskAmt.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            const meterPercent = Math.min(riskPercent * 10, 100);
+            riskBar.style.width = meterPercent + '%';
+            
+            if (riskPercent < 2) {
+                riskBar.style.backgroundColor = 'var(--green)';
+                riskStatus.innerText = '안전 (Low Risk)';
+                riskStatus.style.color = 'var(--green)';
+            } else if (riskPercent < 5) {
+                riskBar.style.backgroundColor = 'var(--yellow)';
+                riskStatus.innerText = '보통 (Moderate Risk)';
+                riskStatus.style.color = 'var(--yellow)';
+            } else {
+                riskBar.style.backgroundColor = 'var(--red)';
+                riskStatus.innerText = '위험 (High Risk)';
+                riskStatus.style.color = 'var(--red)';
+            }
+        }
+
+        inputs.forEach(id => {
+            elements[id].addEventListener('input', () => {
+                if (id === 'pair') updateUI();
+                else calculate();
+            });
+        });
+
+        updateUI();
+
+        document.querySelector('.mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('mobileNav').classList.toggle('open');
+        });
+    </script>
+</body>
+</html>

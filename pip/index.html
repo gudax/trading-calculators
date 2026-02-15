@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>핍 계산기 - FX 핍 가치 계산 | GUDAX</title>
+    <meta name="description" content="GUDAX의 핍 계산기를 사용하여 통화쌍, 랏 사이즈, 계좌 통화에 따른 1핍의 가치를 실시간으로 계산하세요. FX 거래 전략을 위한 필수 도구입니다.">
+    <link rel="canonical" href="https://gudax-tools.github.io/calculators/pip/">
+    <link rel="alternate" hreflang="ko" href="https://gudax-tools.github.io/calculators/pip/">
+    <link rel="alternate" hreflang="en" href="https://gudax-tools.github.io/calculators/pip/?lang=en">
+    <link rel="icon" type="image/svg+xml" href="https://gudax.com/assets/gudaxsymbol.svg">
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-T7TKHNXZ');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "GUDAX 핍 계산기",
+      "url": "https://gudax-tools.github.io/calculators/pip/",
+      "description": "외환(FX) 거래 시 1핍의 가치를 자동으로 계산해주는 온라인 도구입니다.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --card-bg: #111111;
+            --card-border: #222222;
+            --brand-blue: #009FFF;
+            --brand-blue-hover: #007cc7;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --input-bg: #1a1a1a;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding-top: 70px;
+        }
+
+        /* Nav Bar */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background-color: rgba(10, 10, 10, 0.95);
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 5%;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--brand-blue);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--brand-blue);
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 5px;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 2px;
+            background-color: var(--text-primary);
+        }
+
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 20px;
+            z-index: 999;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .mobile-nav.open {
+            display: flex;
+        }
+
+        .mobile-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 1rem;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .mobile-nav a:last-child {
+            border-bottom: none;
+        }
+
+        .mobile-nav a:hover, .mobile-nav a.active {
+            color: var(--brand-blue);
+        }
+
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Calculator Card */
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 30px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            border-color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .input-group select, .input-group input {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 12px 15px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .input-group select:focus, .input-group input:focus {
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 0 2px rgba(0, 159, 255, 0.2);
+        }
+
+        /* Results Section */
+        .results-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .result-item {
+            background-color: rgba(0, 159, 255, 0.05);
+            border: 1px solid rgba(0, 159, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .result-item.highlight {
+            border-color: var(--brand-blue);
+            background-color: rgba(0, 159, 255, 0.1);
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--brand-blue);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 80px;
+            padding: 60px 20px;
+            border-top: 1px solid var(--card-border);
+            text-align: center;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--brand-blue);
+            color: white;
+            text-decoration: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            transition: var(--transition);
+        }
+
+        .cta-button:hover {
+            background-color: var(--brand-blue-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 159, 255, 0.2);
+        }
+
+        .risk-warning {
+            max-width: 600px;
+            margin: 0 auto 20px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            background: #111;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .footer-info {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        #current-price-group {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T7TKHNXZ"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <nav>
+        <a href="https://gudax.com" class="logo">GUDAX</a>
+        <div class="nav-links">
+            <a href="../leverage/">레버리지 계산기</a>
+            <a href="../pip/" class="active">핍 계산기</a>
+            <a href="../lot-size/">롯 사이즈 계산기</a>
+            <a href="../swap/">스왑 계산기</a>
+        </div>
+        <button class="hamburger" aria-label="메뉴">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </nav>
+    <div class="mobile-nav" id="mobileNav">
+        <a href="../leverage/">레버리지 계산기</a>
+        <a href="../pip/" class="active">핍 계산기</a>
+        <a href="../lot-size/">롯 사이즈 계산기</a>
+        <a href="../swap/">스왑 계산기</a>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>핍 계산기</h1>
+            <p>거래하려는 종목의 1핍 가치를 쉽고 정확하게 계산해보세요.</p>
+        </header>
+
+        <div class="calculator-grid">
+            <div class="card">
+                <div class="input-group">
+                    <label for="symbol">통화쌍</label>
+                    <select id="symbol">
+                        <option value="EURUSD">EUR/USD</option>
+                        <option value="GBPUSD">GBP/USD</option>
+                        <option value="USDJPY">USD/JPY</option>
+                        <option value="AUDUSD">AUD/USD</option>
+                        <option value="USDCHF">USD/CHF</option>
+                        <option value="NZDUSD">NZD/USD</option>
+                        <option value="USDCAD">USD/CAD</option>
+                        <option value="EURGBP">EUR/GBP</option>
+                        <option value="EURJPY">EUR/JPY</option>
+                        <option value="GBPJPY">GBP/JPY</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="lot-size">랏 사이즈 (Lot Size)</label>
+                    <input type="number" id="lot-size" value="1.0" step="0.01" min="0.01" max="100">
+                </div>
+
+                <div class="input-group">
+                    <label for="account-currency">계좌 통화</label>
+                    <select id="account-currency">
+                        <option value="USD">USD</option>
+                        <option value="KRW">KRW</option>
+                        <option value="EUR">EUR</option>
+                    </select>
+                </div>
+
+                <div class="input-group" id="current-price-group">
+                    <label for="current-price">현재 가격 (현재 환율)</label>
+                    <input type="number" id="current-price" value="1.0000" step="0.0001">
+                </div>
+            </div>
+
+            <div class="results-section">
+                <div class="result-item highlight">
+                    <span class="result-label">1핍 가치 (1 Pip Value)</span>
+                    <div class="result-value" id="pip-1">0.00</div>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">10핍 가치</span>
+                    <div class="result-value" id="pip-10">0.00</div>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">100핍 가치</span>
+                    <div class="result-value" id="pip-100">0.00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <a href="https://platform.gudax.com" target="_blank" rel="noopener noreferrer" class="cta-button">GUDAX에서 거래 시작하기 →</a>
+        <div class="risk-warning">
+            ⚠️ CFD 거래는 원금 손실 위험이 있습니다. 레버리지 사용은 이익뿐만 아니라 손실 가능성도 확대시킵니다. 투자 전 위험 고지서와 이용 약관을 충분히 숙지하시기 바랍니다.
+        </div>
+        <div class="footer-info">
+            GUDAX | Comoros License L15883/G<br>
+            © 2026 GUDAX. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        const symbolEl = document.getElementById('symbol');
+        const lotSizeEl = document.getElementById('lot-size');
+        const accountCurrencyEl = document.getElementById('account-currency');
+        const currentPriceEl = document.getElementById('current-price');
+        const currentPriceGroup = document.getElementById('current-price-group');
+
+        const pip1El = document.getElementById('pip-1');
+        const pip10El = document.getElementById('pip-10');
+        const pip100El = document.getElementById('pip-100');
+
+        // Initial default prices
+        const defaultPrices = {
+            EURUSD: 1.0850,
+            GBPUSD: 1.2650,
+            USDJPY: 150.20,
+            AUDUSD: 0.6550,
+            USDCHF: 0.8820,
+            NZDUSD: 0.6120,
+            USDCAD: 1.3520,
+            EURGBP: 0.8580,
+            EURJPY: 162.80,
+            GBPJPY: 190.10
+        };
+
+        // Conversion rates to USD (for non-USD account currencies)
+        const conversionToUSD = {
+            USD: 1,
+            KRW: 1345, // 1 USD = 1345 KRW
+            EUR: 0.92   // 1 USD = 0.92 EUR
+        };
+
+        function updateUI() {
+            const symbol = symbolEl.value;
+            const isUSDQuote = symbol.endsWith('USD');
+            
+            if (isUSDQuote) {
+                currentPriceGroup.style.display = 'none';
+            } else {
+                currentPriceGroup.style.display = 'block';
+                if (currentPriceEl.dataset.lastSymbol !== symbol) {
+                    currentPriceEl.value = defaultPrices[symbol];
+                    currentPriceEl.dataset.lastSymbol = symbol;
+                }
+            }
+            calculate();
+        }
+
+        function calculate() {
+            const symbol = symbolEl.value;
+            const lot = parseFloat(lotSizeEl.value) || 0;
+            const accountCurrency = accountCurrencyEl.value;
+            const currentPrice = parseFloat(currentPriceEl.value) || 1;
+            
+            const contractSize = 100000;
+            let pipDecimal = symbol.includes('JPY') ? 0.01 : 0.0001;
+            
+            let pipValueInUSD = 0;
+
+            if (symbol.endsWith('USD')) {
+                pipValueInUSD = lot * pipDecimal * contractSize;
+            } else if (symbol.startsWith('USD')) {
+                pipValueInUSD = (lot * pipDecimal * contractSize) / currentPrice;
+            } else {
+                let pipValueInQuote = lot * pipDecimal * contractSize;
+                
+                if (symbol.endsWith('JPY')) {
+                    const usdjpy = symbol === 'USDJPY' ? currentPrice : defaultPrices['USDJPY'];
+                    pipValueInUSD = pipValueInQuote / usdjpy;
+                } else if (symbol.endsWith('GBP')) {
+                    const gbpusd = defaultPrices['GBPUSD'];
+                    pipValueInUSD = pipValueInQuote * gbpusd;
+                } else if (symbol.endsWith('CHF')) {
+                    const usdchf = defaultPrices['USDCHF'];
+                    pipValueInUSD = pipValueInQuote / usdchf;
+                } else if (symbol.endsWith('CAD')) {
+                    const usdcad = defaultPrices['USDCAD'];
+                    pipValueInUSD = pipValueInQuote / usdcad;
+                }
+            }
+
+            const finalPipValue = pipValueInUSD * conversionToUSD[accountCurrency];
+            displayResults(finalPipValue, accountCurrency);
+        }
+
+        function displayResults(val, currency) {
+            const formatter = new Intl.NumberFormat('ko-KR', {
+                style: 'currency',
+                currency: currency,
+                minimumFractionDigits: currency === 'KRW' ? 0 : 2,
+                maximumFractionDigits: currency === 'KRW' ? 0 : 2
+            });
+
+            pip1El.textContent = formatter.format(val);
+            pip10El.textContent = formatter.format(val * 10);
+            pip100El.textContent = formatter.format(val * 100);
+        }
+
+        [symbolEl, lotSizeEl, accountCurrencyEl, currentPriceEl].forEach(el => {
+            el.addEventListener('input', calculate);
+        });
+
+        symbolEl.addEventListener('change', updateUI);
+        updateUI();
+
+        document.querySelector('.hamburger').addEventListener('click', () => {
+            document.getElementById('mobileNav').classList.toggle('open');
+        });
+    </script>
+</body>
+</html>
